@@ -28,22 +28,30 @@ export const uploadImage = async (req, res) => {
 
 // consultar imágenes (Rango de fecha)
 export const getImagesByDate = async (req, res) => {
-  const { startDate, endDate, page = 1, limit = 10, ...filters } = req.query;
+  const {
+    startDate,
+    endDate,
+    page = 1,
+    limit = 10,
+    // sortBy,
+    // sortOrder,
+    ...filters
+  } = req.query;
+
   let dataUser = req.user;
-  console.log('USE ID CONTROLER: ', dataUser);
-  
+
   try {
     const dateQuery = {};
     if (startDate && endDate) {
       const startDateUTC = moment.tz(startDate, 'America/Bogota').startOf('day').utc().toDate();
       const endDateUTC = moment.tz(endDate, 'America/Bogota').endOf('day').utc().toDate();
       dateQuery.createdAt = { $gte: startDateUTC, $lte: endDateUTC };
-      dateQuery.userId = dataUser && dataUser.rol != 'admin' ? dataUser.id : null;
-
-      // console.log('DATE QUERY:', dateQuery);
     }
-    const query = { ...filters, ...dateQuery };
+    dateQuery.userId = dataUser && dataUser.rol !== 'admin' ? dataUser.id : null;
 
+    const query = { ...filters, ...dateQuery };
+    console.log('QUERTY CONTROLLER: ', query);
+    
     const { total, paginatedImages } = await fetchImagesWithPagination(query, page, limit);
 
     res.status(200).json({

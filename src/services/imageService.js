@@ -37,12 +37,20 @@ export const processImageService = async ({ userId, file }) => {
 //Servicio para consultar los registros por rango de fechas
 export const fetchImagesWithPagination = async (query, page, limit) => {
   try {
+    const sortField = query.sortBy || 'createdAt';
+    const sortDirection = query.sortOrder == 'asc' ? 1 : -1;
+
     const filter = {};
-    // Validar si userId existe y es valido
     if (query.userId) {
-      filter.uploadedBy = new mongoose.Types.ObjectId(query.userId);
+      query.uploadedBy = new mongoose.Types.ObjectId(query.userId);
     }
-    
+
+    if (query.createdAt) {
+      filter.createdAt = query.createdAt;
+    }
+
+    console.log('SERvICE QUERY: ', filter);
+
     const images = await Image.aggregate([
       { $match: filter },
       {
@@ -71,6 +79,9 @@ export const fetchImagesWithPagination = async (query, page, limit) => {
           createdAt: 1,
           'uploadedBy.name': 1,
         },
+      },
+      {
+        $sort: { [sortField]: sortDirection },
       },
       {
         $facet: {
