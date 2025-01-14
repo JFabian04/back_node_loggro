@@ -1,6 +1,6 @@
 
 import moment from 'moment-timezone';
-import {uploadImageMiddleware } from '../utils/imageUtils.js';
+import { uploadImageMiddleware } from '../utils/imageUtils.js';
 import { fetchImagesGroupedByHour, fetchImagesWithPagination, processImageService } from '../services/imageService.js';
 
 //Cargar imagen 
@@ -29,14 +29,18 @@ export const uploadImage = async (req, res) => {
 // consultar imágenes (Rango de fecha)
 export const getImagesByDate = async (req, res) => {
   const { startDate, endDate, page = 1, limit = 10, ...filters } = req.query;
-
+  let dataUser = req.user;
+  console.log('USE ID CONTROLER: ', dataUser);
+  
   try {
     const dateQuery = {};
     if (startDate && endDate) {
       const startDateUTC = moment.tz(startDate, 'America/Bogota').startOf('day').utc().toDate();
       const endDateUTC = moment.tz(endDate, 'America/Bogota').endOf('day').utc().toDate();
       dateQuery.createdAt = { $gte: startDateUTC, $lte: endDateUTC };
-      console.log('DATE QUERY:', startDateUTC, endDateUTC);
+      dateQuery.userId = dataUser && dataUser.rol != 'admin' ? dataUser.id : null;
+
+      // console.log('DATE QUERY:', dateQuery);
     }
     const query = { ...filters, ...dateQuery };
 
@@ -46,10 +50,10 @@ export const getImagesByDate = async (req, res) => {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
-      images: paginatedImages,
+      data: paginatedImages,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching images', error: error.message });
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
 
@@ -69,10 +73,16 @@ export const getImageByHour = async (req, res) => {
     const startDateUTC = moment.utc(startDate).startOf('day').toDate();
     const endDateUTC = moment.utc(endDate).endOf('day').toDate();
 
-    const groupedByDayAndHour = await fetchImagesGroupedByHour(startDateUTC, endDateUTC);
+    const filter = {
+      startDateUTC,
+      endDateUTC,
+      userId: req.user && req.user.rol != 'admin' ? req.user.id : null
+    }
 
-    res.status(200).json({ groupedByDayAndHour });
+    const groupedByDayAndHour = await fetchImagesGroupedByHour(filter);
+
+    res.status(200).json({ status: true, data: groupedByDayAndHour });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener las imágenes por fecha y hora', error: error.message });
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };

@@ -3,8 +3,8 @@ import { loginUserService, registerUserService } from '../services/userService.j
 //Registrar Usuario
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    const result = await registerUserService({ name, email, password });
+    const { name, email, password, rol } = req.body;
+    const result = await registerUserService({ name, email, password, rol });
 
     if (!result.success) {
       return res.status(400).json({ status: false, errors: [{ email: result.message }] });
@@ -12,7 +12,7 @@ export const registerUser = async (req, res) => {
 
     res.status(201).json({ status: true, message: result.message });
   } catch (error) {
-    res.status(500).json({ status: false, message: 'Internal server error', error });
+    res.status(500).json({ status: false, message: 'Internal server error: ', error: error.message });
   }
 };
 
@@ -23,7 +23,7 @@ export const loginUser = async (req, res) => {
 
     const result = await loginUserService({ email, password });
 
-    if (!result.success) {
+    if (!result.status) {
       return res.status(400).json({ status: false, message: result.message });
     }
 

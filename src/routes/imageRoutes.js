@@ -8,7 +8,7 @@ const imageRoutes = express.Router();
 imageRoutes.post(`/upload`, authenticateToken, uploadImage);
 
 // consultar imagenes (fecha / hora)
-imageRoutes.get('/by-date', getImagesByDate);
-imageRoutes.get('/by-hour', getImageByHour);
+imageRoutes.get('/by-date', authenticateToken, getImagesByDate);
+imageRoutes.get('/by-hour', authenticateToken, getImageByHour);
 
 export default imageRoutes;

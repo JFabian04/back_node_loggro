@@ -3,6 +3,7 @@ import Image from '../models/Image.js';
 import path from 'path';
 import fs from 'fs/promises';
 import multer from 'multer';
+import mongoose from 'mongoose';
 
 const UPLOADS_FOLDER = path.join(process.cwd(), 'src', 'uploads');
 
@@ -34,13 +35,20 @@ export const generateProcessedFileName = (originalName) =>
   `${Date.now()}_${originalName.replace(path.extname(originalName), '.png')}`;
 
 // Función para consultar las imágenes dentro de un rango de fechas (en UTC)
-export const getImagesByDateRange = async (startDateUTC, endDateUTC) => {
+export const getImagesByDateRange = async (query) => {
   try {
-    return await Image.find({
-      createdAt: { $gte: startDateUTC, $lte: endDateUTC }
-    });
+    const filter = {
+      createdAt: { $gte: query.startDateUTC, $lte: query.endDateUTC }
+    };
+
+    // Validar userId
+    if (query.userId) {
+      filter.uploadedBy = new mongoose.Types.ObjectId(query.userId);
+    }
+    return await Image.find(filter);
+
   } catch (error) {
-    throw new Error('Error al obtener las imágenes desde la base de datos');
+    throw new Error(error);
   }
 };
 

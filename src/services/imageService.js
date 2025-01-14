@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import Image from '../models/Image.js';
 import { convertToLocalTime, getImagesByDateRange, groupByDayAndHour, PUBLIC_URL } from '../utils/imageUtils.js';
+import mongoose from 'mongoose';
 
 const UPLOADS_FOLDER = path.join(process.cwd(), 'src', 'uploads');
 
@@ -36,8 +37,14 @@ export const processImageService = async ({ userId, file }) => {
 //Servicio para consultar los registros por rango de fechas
 export const fetchImagesWithPagination = async (query, page, limit) => {
   try {
+    const filter = {};
+    // Validar si userId existe y es valido
+    if (query.userId) {
+      filter.uploadedBy = new mongoose.Types.ObjectId(query.userId);
+    }
+    
     const images = await Image.aggregate([
-      { $match: query },
+      { $match: filter },
       {
         $lookup: {
           from: 'users',
@@ -80,13 +87,13 @@ export const fetchImagesWithPagination = async (query, page, limit) => {
     const paginatedImages = images[0]?.images || [];
     return { total, paginatedImages };
   } catch (error) {
-    throw new Error('Error fetching images with pagination');
+    throw new Error(error);
   }
 };
 
 //consultar cantidad de imagenes procedas por hora en días
-export const fetchImagesGroupedByHour = async (startDateUTC, endDateUTC) => {
-  const images = await getImagesByDateRange(startDateUTC, endDateUTC);
+export const fetchImagesGroupedByHour = async (filter) => {
+  const images = await getImagesByDateRange(filter);
   const imagesWithLocalTime = convertToLocalTime(images);
   return groupByDayAndHour(imagesWithLocalTime);
 };
