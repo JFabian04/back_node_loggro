@@ -33,7 +33,6 @@ app.use(cookieParser());
 //Ruta estatica para archivos
 app.use('/uploads', express.static(path.join('src', 'uploads')));
 
-
 // Conectar con MongoDB
 connectDB();
 // Rutas
@@ -42,5 +41,5 @@ app.use('/api', router);
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Servidor iniciado en puerto: ${PORT}`);
 });
