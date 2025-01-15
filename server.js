@@ -12,14 +12,15 @@ const app = express();
 
 //Cors
 const corsOptions = {
-  origin: (origin, callback) => {
-    //Oringenes dinamicos con credentials
-    if (!origin || origin === 'http://localhost:5173') {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
+  // origin: (origin, callback) => {
+  //   //Oringenes dinamicos con credentials
+  //   if (!origin || origin === 'http://localhost:5173') {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error('No permitido por CORS'));
+  //   }
+  // },
+  origin: process.env.REACT_DOMAIN,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
