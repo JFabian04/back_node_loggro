@@ -37,8 +37,10 @@ export const generateProcessedFileName = (originalName) =>
 // Función para consultar las imágenes dentro de un rango de fechas (en UTC)
 export const getImagesByDateRange = async (query) => {
   try {
+    const startDateUTC = moment.tz(query.startDateUTC, 'America/Bogota').startOf('day').utc().toDate();
+    const endDateUTC = moment.tz(query.endDateUTC, 'America/Bogota').endOf('day').utc().toDate();
     const filter = {
-      createdAt: { $gte: query.startDateUTC, $lte: query.endDateUTC }
+      createdAt: { $gte: startDateUTC, $lte: endDateUTC }
     };
 
     // Validar userId

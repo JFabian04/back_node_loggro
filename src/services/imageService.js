@@ -38,21 +38,23 @@ export const processImageService = async ({ userId, file }) => {
 export const fetchImagesWithPagination = async (query, page, limit) => {
   try {
     const sortField = query.sortBy || 'createdAt';
-    const sortDirection = query.sortOrder == 'asc' ? 1 : -1;
+    const sortDirection = query.sortOrder === 'asc' ? 1 : -1;
 
     const filter = {};
-    if (query.userId) {
-      query.uploadedBy = new mongoose.Types.ObjectId(query.userId);
+
+    if (query.userId && query.userId !== 'null' && query.userId !== '') {
+      console.log('Filtrando por uploadedBy con userId:', query.userId);
+      filter.uploadedBy = new mongoose.Types.ObjectId(query.userId); 
+    } else {
+      console.log('No se pasa userID');
     }
 
     if (query.createdAt) {
       filter.createdAt = query.createdAt;
     }
 
-    console.log('SERvICE QUERY: ', filter);
-
     const images = await Image.aggregate([
-      { $match: filter },
+      { $match: filter }, 
       {
         $lookup: {
           from: 'users',
@@ -98,6 +100,7 @@ export const fetchImagesWithPagination = async (query, page, limit) => {
     const paginatedImages = images[0]?.images || [];
     return { total, paginatedImages };
   } catch (error) {
+    console.error('Error fetching images:', error);
     throw new Error(error);
   }
 };

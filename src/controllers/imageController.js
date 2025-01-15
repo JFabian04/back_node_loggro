@@ -8,23 +8,22 @@ export const uploadImage = async (req, res) => {
   try {
     uploadImageMiddleware(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ message: 'Error uploading file', error: err.message });
+        return res.status(400).json({ message: 'Error cargado imagn', error: err.message });
       }
 
       try {
         const userId = req.user.id;
         const image = await processImageService({ userId, file: req.file });
 
-        res.status(200).json({ message: 'Image uploaded and processed successfully', image });
+        res.status(200).json({ message: 'Imagen convertida correctamente', image });
       } catch (error) {
-        res.status(500).json({ message: 'Error processing the image', error: error.message });
+        res.status(500).json({ message: 'Error procesando la imagen', error: error.message });
       }
     });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
-
 
 // consultar imágenes (Rango de fecha)
 export const getImagesByDate = async (req, res) => {
@@ -50,7 +49,7 @@ export const getImagesByDate = async (req, res) => {
     dateQuery.userId = dataUser && dataUser.rol !== 'admin' ? dataUser.id : null;
 
     const query = { ...filters, ...dateQuery };
-    console.log('QUERTY CONTROLLER: ', query);
+    console.log('QUERTY CONTROLLER: ',  req.user);
     
     const { total, paginatedImages } = await fetchImagesWithPagination(query, page, limit);
 
